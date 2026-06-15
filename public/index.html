@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Online Bookstore</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+    <ul class="bg-shapes">
+        <li></li><li></li><li></li><li></li><li></li>
+        <li></li><li></li><li></li><li></li><li></li>
+    </ul>
+    <div class="glass-container login-box">
+        <h1>Welcome Back</h1>
+        <p>Login to your Admin Dashboard</p>
+        
+        <div class="suggestion-text">
+            <strong>Demo Credentials:</strong><br>
+            Email: admin@bookstore.com<br>
+            Password: admin123
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" value="admin@bookstore.com" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" value="admin123" required>
+            </div>
+            <button type="submit" class="primary-btn w-100">Sign In</button>
+        </form>
+
+        <div class="form-footer">
+            <p>Need access? <a href="#" onclick="openRegisterModal()">Register new Admin</a></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content glass-container">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <h2>Register Admin</h2>
+            <form id="registerForm">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="regUsername" required>
+                </div>
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <button type="submit" class="primary-btn w-100">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openRegisterModal() { document.getElementById('registerModal').style.display = 'flex'; }
+        function closeRegisterModal() { document.getElementById('registerModal').style.display = 'none'; }
+        
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                username: document.getElementById('regUsername').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value
+            };
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if(res.ok) {
+                    alert('Admin registered successfully! You can now log in.');
+                    closeRegisterModal();
+                    e.target.reset();
+                } else {
+                    alert('Registration failed. Username or email might already exist.');
+                }
+            } catch(e) { console.error(e); }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    // Save user details to localStorage
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    localStorage.setItem('authToken', data.token); // Save JWT
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Invalid login credentials!');
+                }
+            } catch (e) { console.error(e); }
+        });
+    </script>
+</body>
+</html>
